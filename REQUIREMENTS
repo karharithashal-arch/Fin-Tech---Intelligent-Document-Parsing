@@ -1,0 +1,39 @@
+🔹 Functional Requirements
+
+*The system must accept PDF documents as input.
+
+*The system must convert PDF pages into images using Poppler.
+
+*The system must extract text from images using Tesseract OCR.
+
+*The system must support multi-page PDFs.
+
+*The system must save extracted text into a .txt file.
+
+*The system must handle missing file errors gracefully.
+
+
+🔹 Technical Requirements
+Programming Language
+
+*Python 3.10.0
+
+Python Libraries
+
+*pytesseract
+
+*pdf2image
+
+*Pillow
+
+*os (built-in)
+
+🔹 External Dependencies 
+
+*Tesseract OCR Engine
+
+Used for Optical Character Recognition.
+
+*Poppler
+
+Used for converting PDF → images
