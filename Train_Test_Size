@@ -1,0 +1,69 @@
+import json
+
+def convert_cuad_to_spacy(json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    print("Contracts found:", len(data["data"]))
+
+    TRAIN_DATA = []
+
+    for doc in data["data"]:
+        for paragraph in doc["paragraphs"]:
+            text = paragraph["context"]
+            entities = []
+
+            for qa in paragraph["qas"]:
+                if qa.get("is_impossible", False):
+                    continue
+
+                label = qa["id"].split("__")[-1]
+                label = label.replace(" ", "_").replace("/", "_").upper()
+
+                for ans in qa["answers"]:
+                    start = ans["answer_start"]
+                    end = start + len(ans["text"])
+                    entities.append((start, end, label))
+
+            if entities:
+                TRAIN_DATA.append((text, {"entities": entities}))
+
+    print("Samples created:", len(TRAIN_DATA))
+    return TRAIN_DATA
+
+TRAIN_DATA = convert_cuad_to_spacy("CUAD_v1.json")
+
+print("TRAIN_DATA type:", type(TRAIN_DATA))
+
+def remove_overlapping_entities(entities):
+    entities = sorted(entities, key=lambda x: x[0])
+    cleaned = []
+    last_end = -1
+
+    for start, end, label in entities:
+        if start >= last_end:
+            cleaned.append((start, end, label))
+            last_end = end
+
+    return cleaned
+
+
+from sklearn.model_selection import train_test_split
+
+train_data, test_data = train_test_split(
+    TRAIN_DATA,
+    test_size=0.2,
+    random_state=42
+)
+
+print("Train size:", len(train_data))
+print("Test size:", len(test_data))
+
+
+
+OUTPUT:
+Contracts found: 510
+Samples created: 510
+TRAIN_DATA type: <class 'list'>
+Train size: 408
+Test size: 102
