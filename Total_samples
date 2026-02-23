@@ -1,0 +1,35 @@
+import json
+
+def convert_cuad_to_spacy(json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    TRAIN_DATA = []
+
+    for doc in data["data"]:
+        for paragraph in doc["paragraphs"]:
+            text = paragraph["context"]
+            entities = []
+
+            for qa in paragraph["qas"]:
+                label = qa["id"].split("__")[-1].replace(" ", "_").upper()
+
+                for ans in qa["answers"]:
+                    start = ans["answer_start"]
+                    end = start + len(ans["text"])
+                    entities.append((start, end, label))
+
+            if entities:
+                TRAIN_DATA.append((text, {"entities": entities}))
+
+    return TRAIN_DATA
+
+
+TRAIN_DATA = convert_cuad_to_spacy("CUAD_v1.json")
+
+print("Total training samples:", len(TRAIN_DATA))
+
+
+
+OUTPUT:
+Total training samples: 510
