@@ -1,0 +1,32 @@
+import json
+
+def convert_cuad_to_spacy(json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    spacy_data = []
+
+    for doc in data["data"]:
+        for paragraph in doc["paragraphs"]:
+            text = paragraph["context"]
+            entities = []
+
+            for qa in paragraph["qas"]:
+                if qa["is_impossible"]:
+                    continue
+
+                label = qa["id"].split("__")[-1]
+                label = label.replace(" ", "_").replace("/", "_").upper()
+
+                for ans in qa["answers"]:
+                    start = ans["answer_start"]
+                    end = start + len(ans["text"])
+                    entities.append((start, end, label))
+
+            if entities:
+                spacy_data.append((text, {"entities": entities}))
+
+    return spacy_data
+
+
+TEST_DATA = convert_cuad_to_spacy("CUAD_v1.json")
