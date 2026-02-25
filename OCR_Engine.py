@@ -3,7 +3,7 @@ from pdf2image import convert_from_path
 import os
  
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-POPPLER_PATH = r'C:\poppler\poppler-25.12.0\Library\bin'
+POPPLER_PATH = r'C:\Users\Admin\Downloads\New folder\Release-23.11.0-0\poppler-23.11.0\Library\bin'
 
 def extract_contract_text(pdf_path):
     images = convert_from_path(pdf_path, poppler_path=POPPLER_PATH)
