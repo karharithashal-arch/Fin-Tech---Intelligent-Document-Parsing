@@ -1,0 +1,54 @@
+import pytesseract
+from pdf2image import convert_from_path
+import pandas as pd
+import numpy as np
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+POPPLER_PATH = r"C:\Users\Admin\Downloads\New folder\Release-23.11.0-0\poppler-23.11.0\Library\bin"
+
+def evaluate_without_groundtruth(pdf_path):
+    images = convert_from_path(pdf_path, dpi=300, poppler_path=POPPLER_PATH)
+
+    all_confidences = []
+    full_text = ""
+
+    for img in images:
+        data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DATAFRAME)
+
+        data = data[data.conf != -1]
+
+        confidences = data["conf"].astype(float)
+        all_confidences.extend(confidences.tolist())
+
+        page_text = " ".join(data["text"].dropna())
+        full_text += page_text + " "
+
+    if not full_text.strip():
+        print("OCR output is EMPTY — Severe failure")
+        return
+
+    avg_conf = np.mean(all_confidences)
+
+    print("\n OCR QUALITY REPORT (No Ground Truth)")
+    print("----------------------------------------")
+    print("Total Words:", len(all_confidences))
+    print("Average Confidence:", round(avg_conf, 2))
+
+    if avg_conf > 85:
+        print("Quality: HIGH (Clean Scan)")
+    elif avg_conf > 70:
+        print("Quality: MEDIUM (Noisy Scan)")
+    else:
+        print("Quality: LOW (Heavy Noise / Blur)")
+
+if __name__ == "__main__":
+    pdf_file = r"C:\Users\Admin\Downloads\New folder\data\sample.pdf"
+    evaluate_without_groundtruth(pdf_file)
+
+
+OUTPUT:
+OCR QUALITY REPORT 
+----------------------
+Total Words: 34
+Average Confidence: 96.0
+Quality: HIGH (Clean Scan)
